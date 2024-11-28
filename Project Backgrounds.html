@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden;
         }
 
         /* Full-screen video background */
@@ -19,7 +19,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Cover the entire screen */
+            object-fit: cover; 
             z-index: -1; /* Send the video behind other content */
         }
 
@@ -30,13 +30,13 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+            background-color: rgba(0, 0, 0, 0.6);
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
             border-radius: 10px;
-            z-index: 1; /* Keep the verse in front */
+            z-index: 1; 
         }
 
         .verse {
@@ -86,6 +86,10 @@
         changeVerse();
         setInterval(changeVerse,  1* 60 * 1000); // Change every 10 min
 
+
+
+        //<------------------- From here you can remove the code if you don't want wallpaper property of the wallpaper Engine---------------------------------->
+
         // Listen for changes to the font color property
     window.wallpaperPropertyListener = {
         applyUserProperties: function(properties) {
@@ -132,16 +136,14 @@
             const opacity = properties.backgroundopacity.value / 100; // Convert 0-100 to 0-1 range
             const container = document.getElementById('verse-container');
 
-            // Get the current background color
             const currentBackground = getComputedStyle(container).backgroundColor;
-
-            // Check if the background is in 'rgb' or 'rgba' format
+            
             if (currentBackground.includes('rgba')) {
-                // If in rgba, update the alpha value
+                
                 const newBackground = currentBackground.replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/, `rgba($1,$2,$3,${opacity})`);
                 container.style.backgroundColor = newBackground;
             } else {
-                // If in rgb, convert to rgba with the opacity
+                
                 const newBackground = currentBackground.replace(/rgb\(([^,]+),([^,]+),([^,]+)\)/, `rgba($1,$2,$3,${opacity})`);
                 container.style.backgroundColor = newBackground;
             }
