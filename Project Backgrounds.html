@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bible Verse Changer with Background</title>
     <style>
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             height: 100%;
             overflow: hidden;
+            /* Prevent scrolling */
         }
 
         /* Full-screen video background */
@@ -19,8 +22,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; 
-            z-index: -1; /* Send the video behind other content */
+            object-fit: cover;
+            /* Cover the entire screen */
+            z-index: -1;
+            /* Send the video behind other content */
         }
 
         /* Verse container styles */
@@ -31,12 +36,14 @@
             align-items: center;
             height: 100vh;
             background-color: rgba(0, 0, 0, 0.6);
+            /* Semi-transparent background */
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
             border-radius: 10px;
-            z-index: 1; 
+            z-index: 1;
+            /* Keep the verse in front */
         }
 
         .verse {
@@ -46,11 +53,13 @@
 
         .reference {
             /*font-size: 18px;*/
-            font-size: 0.75em; /* Set to 75% of verse font size by default */
+            font-size: 0.75em;
+            /* Set to 75% of verse font size by default */
             font-style: italic;
         }
     </style>
 </head>
+
 <body>
 
     <!-- Use a video in WEBM format -->
@@ -65,98 +74,136 @@
     </div>
 
     <!-- Link to the verses.js file -->
-     <script src="Verses_NIV.js"></script>
-    
+    <script src="Verses_NIV.js"></script>
+
     <script>
+
+        // Verse change interval (default: 1 minute)
+        let verseChangeInterval = 1 * 60 * 1000;
+        let intervalId = null;
 
 
         function changeVerse() {
             const verseElement = document.getElementById('verseText');
             const referenceElement = document.getElementById('verseReference');
-            
+
             // Select a random verse
             const selectedVerse = versesArray[Math.floor(Math.random() * versesArray.length)];
-            
+
             // Update the text and reference
             verseElement.textContent = selectedVerse.verseText;
             referenceElement.textContent = `~ ${selectedVerse.verseReference}`;
         }
 
         // Change verse initially and set interval
-        changeVerse();
-        setInterval(changeVerse,  1* 60 * 1000); // Change every 10 min
+        //changeVerse();
+        //setInterval(changeVerse,  1* 60 * 1000); // Change every 10 min
 
+        function startVerseTimer() {
+            // Clear any existing interval
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
 
+            // Change verse initially
+            changeVerse();
+
+            // Set a new interval with the current time setting
+            intervalId = setInterval(changeVerse, verseChangeInterval);
+        }
+
+        // Initialize the verse timer
+        startVerseTimer();
 
         //<------------------- From here you can remove the code if you don't want wallpaper property of the wallpaper Engine---------------------------------->
 
+
         // Listen for changes to the font color property
-    window.wallpaperPropertyListener = {
-        applyUserProperties: function(properties) {
-            if (properties.fontcolor) {
-                // Convert the color from "0 0 0" (RGB) to CSS "rgb(0, 0, 0)"
-                var c = properties.fontcolor.value.split(' ').map(function(c) {
-                    return Math.ceil(c * 255);  // Convert to 0-255 range
-                });
-                var colorString = 'rgb(' + c.join(', ') + ')';
+        window.wallpaperPropertyListener = {
+            applyUserProperties: function (properties) {
+                if (properties.fontcolor) {
+                    // Convert the color from "0 0 0" (RGB) to CSS "rgb(0, 0, 0)"
+                    var c = properties.fontcolor.value.split(' ').map(function (c) {
+                        return Math.ceil(c * 255);  // Convert to 0-255 range
+                    });
+                    var colorString = 'rgb(' + c.join(', ') + ')';
 
-                // Apply the color to both verse and reference
-                document.getElementById('verseText').style.color = colorString;
-                document.getElementById('verseReference').style.color = colorString;
-        }
+                    // Apply the color to both verse and reference
+                    document.getElementById('verseText').style.color = colorString;
+                    document.getElementById('verseReference').style.color = colorString;
+                }
 
-        if (properties.fontsize) {
+                if (properties.fontsize) {
                     // Retrieve the font size from the Wallpaper Engine slider (adjustable by the user)
                     var fontSize = properties.fontsize.value + 'px';
-                    
+
                     // Apply the font size to the verse element
                     document.getElementById('verseText').style.fontSize = fontSize;
-                    
+
                     // Set the reference font size as 75% of the verse font size
                     document.getElementById('verseReference').style.fontSize = (properties.fontsize.value * 0.75) + 'px';
                 }
 
 
-            // **NEW**: Video switching logic
-        if (properties.videoselector ) {
-            const videoPath = properties.videoselector.value; // Get the selected video path
-            const videoElement = document.getElementById('backgroundVideo');
-            const videoSourceElement = document.getElementById('videoSource');
-            
-            // Update the video source
-            videoSourceElement.src = videoPath;
-            
-            // Reload and play the new video
-            videoElement.load();
-            videoElement.play();
-        }
-        
-        // Semi-transparent background change
-        if (properties.backgroundopacity) {
-            const opacity = properties.backgroundopacity.value / 100; // Convert 0-100 to 0-1 range
-            const container = document.getElementById('verse-container');
+                // **NEW**: Video switching logic
+                if (properties.videoselector) {
+                    const videoPath = properties.videoselector.value; // Get the selected video path
+                    const videoElement = document.getElementById('backgroundVideo');
+                    const videoSourceElement = document.getElementById('videoSource');
 
-            const currentBackground = getComputedStyle(container).backgroundColor;
-            
-            if (currentBackground.includes('rgba')) {
-                
-                const newBackground = currentBackground.replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/, `rgba($1,$2,$3,${opacity})`);
-                container.style.backgroundColor = newBackground;
-            } else {
-                
-                const newBackground = currentBackground.replace(/rgb\(([^,]+),([^,]+),([^,]+)\)/, `rgba($1,$2,$3,${opacity})`);
-                container.style.backgroundColor = newBackground;
+                    // Update the video source
+                    videoSourceElement.src = videoPath;
+
+                    // Reload and play the new video
+                    videoElement.load();
+                    videoElement.play();
+                }
+
+                // Semi-transparent background change
+                if (properties.backgroundopacity) {
+                    const opacity = properties.backgroundopacity.value / 100; // Convert 0-100 to 0-1 range
+                    const container = document.getElementById('verse-container');
+
+                    // Get the current background color
+                    const currentBackground = getComputedStyle(container).backgroundColor;
+
+                    // Check if the background is in 'rgb' or 'rgba' format
+                    if (currentBackground.includes('rgba')) {
+                        // If in rgba, update the alpha value
+                        const newBackground = currentBackground.replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/, `rgba($1,$2,$3,${opacity})`);
+                        container.style.backgroundColor = newBackground;
+                    } else {
+                        // If in rgb, convert to rgba with the opacity
+                        const newBackground = currentBackground.replace(/rgb\(([^,]+),([^,]+),([^,]+)\)/, `rgba($1,$2,$3,${opacity})`);
+                        container.style.backgroundColor = newBackground;
+                    }
+
+
+                }
+
+                // time for change for verse
+                if (properties.changeinterval) {
+                    // Get the interval in minutes from the property
+                    const minutes = properties.changeinterval.value;
+
+                    // Convert to milliseconds
+                    verseChangeInterval = minutes * 60 * 1000;
+
+                    // Restart the timer with the new interval
+                    startVerseTimer();
+
+                    // Log the new interval (helpful for debugging)
+                    console.log(`Verse change interval set to ${minutes} minutes`);
+                }
+
             }
-
-        
-    }
-}
-    }
+        }
 
 
-          
+
 
     </script>
 
 </body>
+
 </html>
